@@ -34,7 +34,7 @@ def check_image(image):
 def test(image_name, model_dir, device_id):
     model_test = AntiSpoofPredict(device_id)
     image_cropper = CropImage()
-    image = cv2.imread(SAMPLE_IMAGE_PATH + image_name)
+    image = cv2.imread(image_name)
     result = check_image(image)
     if result is False:
         return
@@ -82,9 +82,9 @@ def test(image_name, model_dir, device_id):
         (image_bbox[0], image_bbox[1] - 5),
         cv2.FONT_HERSHEY_COMPLEX, 0.5*image.shape[0]/1024, color)
 
-    format_ = os.path.splitext(image_name)[-1]
-    result_image_name = image_name.replace(format_, "_result" + format_)
-    cv2.imwrite(SAMPLE_IMAGE_PATH + result_image_name, image)
+    face_name = image_name.split(".")[0]
+    final_name = face_name + "_result.jpg"
+    cv2.imwrite(final_name, image)
 
 
 if __name__ == "__main__":
