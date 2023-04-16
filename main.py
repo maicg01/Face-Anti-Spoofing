@@ -174,26 +174,6 @@ class UI(QMainWindow):
 
 
 if __name__ == "__main__":
-    # desc = "test"
-    # parser = argparse.ArgumentParser(description=desc)
-    # parser.add_argument(
-    #     "--device_id",
-    #     type=int,
-    #     default=1,
-    #     help="which gpu id, [0/1/2/3]")
-    # parser.add_argument(
-    #     "--model_dir",
-    #     type=str,
-    #     default="./resources/anti_spoof_models",
-    #     help="model_lib used to test")
-    # parser.add_argument(
-    #     "--image_name",
-    #     type=str,
-    #     default="image_F1.jpg",
-    #     help="image used to test")
-    # args = parser.parse_args()
-    # test(args.image_name, args.model_dir, args.device_id)
-
     app = QApplication(sys.argv)
     win = UI()
     win.show()
