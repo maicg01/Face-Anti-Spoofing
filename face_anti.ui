@@ -138,7 +138,7 @@ border-radius: 15px;
     <property name="geometry">
      <rect>
       <x>1160</x>
-      <y>290</y>
+      <y>190</y>
       <width>191</width>
       <height>61</height>
      </rect>
@@ -260,6 +260,32 @@ color: rgb(245, 82, 123);
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
+   <widget class="QPushButton" name="start">
+    <property name="geometry">
+     <rect>
+      <x>1160</x>
+      <y>300</y>
+      <width>191</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(0, 255, 0);
+color: rgb(0, 0, 0);
+border-radius: 10px;
+</string>
+    </property>
+    <property name="text">
+     <string>Start</string>
+    </property>
+   </widget>
    <zorder>aft_img_2</zorder>
    <zorder>aft_frame</zorder>
    <zorder>pre_img</zorder>
@@ -268,6 +294,7 @@ color: rgb(245, 82, 123);
    <zorder>Reset</zorder>
    <zorder>author</zorder>
    <zorder>pre_frame</zorder>
+   <zorder>start</zorder>
   </widget>
  </widget>
  <resources/>
