@@ -21,23 +21,34 @@ warnings.filterwarnings('ignore')
 SAMPLE_IMAGE_PATH = "./images/"
 
 
-# 因为安卓端APK获取的视频流宽高比为3:4,为了与之一致，所以将宽高比限制为3:4
-def check_image(image):
-    height, width, channel = image.shape
-    if width/height != 3/4:
-        print("Image is not appropriate!!!\nHeight/Width should be 4/3.")
-        return True
-    else:
-        return True
+def take_image(image):
+    height, width = image.shape[:2]
+    if height / width != 4 / 3:
+        if width > height:
+            new_width = height * 3 // 4
+
+            # Tính toán vị trí cắt
+            x_offset = (width - new_width) // 2
+
+            # Cắt ảnh
+            cropped_image = image[:, x_offset:x_offset+new_width, :]
+            cv2.imwrite('new_image.jpg', cropped_image)
+        else:
+            new_height = width * 4 // 3
+
+            # Tính toán vị trí cắt
+            y_offset = (height - new_height) // 2
+            cropped_image = image[y_offset:y_offset+new_height, :, :]
+            cv2.imwrite('new_image.jpg', cropped_image)
+
+    return cropped_image
 
 
 def test(image_name, model_dir, device_id):
     model_test = AntiSpoofPredict(device_id)
     image_cropper = CropImage()
-    image = cv2.imread(SAMPLE_IMAGE_PATH + image_name)
-    result = check_image(image)
-    if result is False:
-        return
+    image = cv2.imread(image_name)
+    image = take_image(image)
     image_bbox = model_test.get_bbox(image)
     prediction = np.zeros((1, 3))
     test_speed = 0
@@ -84,7 +95,7 @@ def test(image_name, model_dir, device_id):
 
     format_ = os.path.splitext(image_name)[-1]
     result_image_name = image_name.replace(format_, "_result" + format_)
-    cv2.imwrite(SAMPLE_IMAGE_PATH + result_image_name, image)
+    cv2.imwrite(result_image_name, image)
 
 
 if __name__ == "__main__":
