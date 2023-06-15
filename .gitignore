@@ -1,3 +1,4 @@
 *.pyc
 ./saved_logs
 ./datasets
+images/
