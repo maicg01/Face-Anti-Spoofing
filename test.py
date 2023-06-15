@@ -103,7 +103,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--device_id",
         type=int,
-        default=1,
+        default=0,
         help="which gpu id, [0/1/2/3]")
     parser.add_argument(
         "--model_dir",
