@@ -9,6 +9,7 @@ import argparse
 import warnings
 import time
 
+import onnxruntime
 from src.anti_spoof_predict import AntiSpoofPredict
 from src.generate_patches import CropImage
 from src.utility import parse_model_name
@@ -16,6 +17,24 @@ warnings.filterwarnings('ignore')
 
 
 path = "/home/maicg/Downloads/photo_2023-03-10_17-39-16" #khong co .jpg
+
+def to_input(pil_rgb_image):
+    np_img = np.array(pil_rgb_image, dtype = np.float32)
+    # np_img = ((np_img / 255.) - 0.5) / 0.5
+    # np_img = np_img / 255.
+    try:
+        np_img = np_img.swapaxes(1, 2).swapaxes(0, 1)
+    except:
+        print('error')
+        return None
+    np_img = np.reshape(np_img, [1, 3, 80, 80])
+    
+    # tensor = torch.tensor([brg_img.transpose(2,0,1)]).float()
+    return np_img
+
+def load_model_onnx(file_name):
+    session = onnxruntime.InferenceSession(file_name, providers=['CUDAExecutionProvider'])
+    return session
 
 def take_image(image):
     height, width = image.shape[:2]
@@ -99,7 +118,6 @@ process_image, toado = take_image(crop_img)
 new_bbox_x = new_bbox_x - toado[1]
 new_bbox_y = new_bbox_y - toado[0]
 
-cv2.imwrite("./process_output.jpg", process_image)
 cv2.imshow('process_crop', process_image)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
@@ -115,6 +133,7 @@ def test(image, model_dir, device_id):
     test_speed = 0
     # sum the prediction from single model's result
     for model_name in os.listdir(model_dir):
+        path_model = os.path.join(model_dir,model_name)
         h_input, w_input, model_type, scale = parse_model_name(model_name)
         param = {
             "org_img": image,
@@ -128,8 +147,14 @@ def test(image, model_dir, device_id):
             param["crop"] = False
         img = image_cropper.crop(**param)
         print("shape: ", img.shape)
+        input = to_input(img)
         start = time.time()
-        prediction += model_test.predict(img, os.path.join(model_dir, model_name))
+        session = load_model_onnx(path_model)
+        results = session.run(['output'], {'input': input})
+        rs = results[0]
+        softmax_x = np.exp(rs) / np.sum(np.exp(rs), axis=1, keepdims=True)
+        print(softmax_x)
+        prediction += softmax_x
         test_speed += time.time()-start
 
     # draw result of prediction
@@ -169,7 +194,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_dir",
         type=str,
-        default="./resources/anti_spoof_models",
+        default="./onnx",
         help="model_lib used to test")
     parser.add_argument(
         "--image_name",
