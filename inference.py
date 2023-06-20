@@ -14,7 +14,6 @@ from src.generate_patches import CropImage
 from src.utility import parse_model_name
 warnings.filterwarnings('ignore')
 
-
 path = "/home/maicg/Downloads/photo_2023-03-10_17-39-16" #khong co .jpg
 
 def take_image(image):

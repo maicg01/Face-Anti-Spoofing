@@ -16,7 +16,7 @@ from src.utility import parse_model_name
 warnings.filterwarnings('ignore')
 
 
-path = "/home/maicg/Downloads/photo_2023-03-10_17-39-16" #khong co .jpg
+path = "/home/maicg/Downloads/photo_2023-03-10_11-24-09" #khong co .jpg
 
 def to_input(pil_rgb_image):
     np_img = np.array(pil_rgb_image, dtype = np.float32)
@@ -146,7 +146,11 @@ def test(image, model_dir, device_id):
         if scale is None:
             param["crop"] = False
         img = image_cropper.crop(**param)
+        cv2.imshow('image_crop', img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
         print("shape: ", img.shape)
+        print(h_input, w_input, model_type, scale)
         input = to_input(img)
         start = time.time()
         session = load_model_onnx(path_model)
