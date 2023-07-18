@@ -3,3 +3,5 @@
 ./datasets
 images/
 new_image.jpg
+*.onnx
+*.jpg
