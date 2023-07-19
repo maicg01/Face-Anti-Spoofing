@@ -6,3 +6,4 @@ new_image.jpg
 *.onnx
 *.jpg
 *.png
+prepare_data_face_anti.py
