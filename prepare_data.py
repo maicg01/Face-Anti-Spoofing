@@ -1,11 +1,7 @@
 import cv2
 import numpy as np
-import insightface
 
 import os
-import argparse
-import warnings
-import time
 from src.generate_patches import CropImage
 from src.utility import parse_model_name
 from utils.load_model import SCRFD, load_model_onnx
@@ -91,6 +87,9 @@ def prepare_data(image, bbox, w_input, h_input, dir_save, name_image, name_real_
     if scale is None:
         param["crop"] = False
     img = image_cropper.crop(**param)
+    # cv2.imshow('image_crop', img)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
     if scale == None:
         dir_save_folder = dir_save + '/org_1_80x60/' + str(name_real_fake) 
     else:
@@ -103,33 +102,44 @@ def prepare_data(image, bbox, w_input, h_input, dir_save, name_image, name_real_
         print(f"Folder '{dir_save_folder}' already exists")
 
     path_save_image = dir_save_folder + '/' + str(name_image) + '.png'
+    print(path_save_image)
     cv2.imwrite(path_save_image, img)
 
 if __name__ == "__main__":
     dir_save = '/home/maicg/Documents/Me/ANTI-FACE/Face-Anti-Spoofing/datasets/rgb_image'
     detector = SCRFD(model_file='./onnx/scrfd_2.5g_bnkps.onnx')
     detector.prepare(-1)
-    dir_data = ''
+    dir_data = '/home/maicg/Documents/archive/CelebA_Spoof_/CelebA_Spoof/Data/train'
     i = 0
-    for dir in os.listdir(dir_data):
-        pathdir = os.path.join(dir_data,dir)
-        for image in os.listdir(pathdir):
-            pathName = os.path.join(pathdir,image)
-            img = cv2.imread(pathName)
-            bboxes, kpss = take_box_detector(img, detector)
-            bbox = bboxes[0]
-            x1,y1,x2,y2,_ = bbox.astype(np.int)
-            _,_,_,_,score = bbox.astype(np.float)
-            new_bbox = [x1, y1, x2, y2]
-            if 'live' in dir:
-                prepare_data(image, new_bbox, 60, 80, dir_save, i, 1, scale=None)
-                prepare_data(image, new_bbox, 80, 80, dir_save, i, 1, scale=1)
-                prepare_data(image, new_bbox, 80, 80, dir_save, i, 1, scale=2.7)
-                prepare_data(image, new_bbox, 80, 80, dir_save, i, 1, scale=4)
-                i = i + 1
-            if 'spoof' in dir:
-                prepare_data(image, new_bbox, 60, 80, dir_save, i, 0, scale=None)
-                prepare_data(image, new_bbox, 80, 80, dir_save, i, 0, scale=1)
-                prepare_data(image, new_bbox, 80, 80, dir_save, i, 0, scale=2.7)
-                prepare_data(image, new_bbox, 80, 80, dir_save, i, 0, scale=4)
-                i = i + 1
+    for f in os.listdir(dir_data):
+        pathf = os.path.join(dir_data,f)
+        for dir in os.listdir(pathf):
+            pathdir = os.path.join(pathf,dir)
+            for image in os.listdir(pathdir):
+                pathName = os.path.join(pathdir,image)
+                # print(pathName)
+                try:
+                    img = cv2.imread(pathName)
+                    # cv2.imshow('img', img)
+                    # cv2.waitKey(0)
+                    # cv2.destroyAllWindows()
+                    bboxes, kpss = take_box_detector(img, detector)
+                    bbox = bboxes[0]
+                    x1,y1,x2,y2,_ = bbox.astype(np.int)
+                    _,_,_,_,score = bbox.astype(np.float)
+                    new_bbox = [x1, y1, x2, y2]
+                    if 'live' in dir:
+                        prepare_data(img, new_bbox, 60, 80, dir_save, i, 1, scale=None)
+                        prepare_data(img, new_bbox, 80, 80, dir_save, i, 1, scale=1)
+                        prepare_data(img, new_bbox, 80, 80, dir_save, i, 1, scale=2.7)
+                        prepare_data(img, new_bbox, 80, 80, dir_save, i, 1, scale=4)
+                        i = i + 1
+                    if 'spoof' in dir:
+                        prepare_data(img, new_bbox, 60, 80, dir_save, i, 0, scale=None)
+                        prepare_data(img, new_bbox, 80, 80, dir_save, i, 0, scale=1)
+                        prepare_data(img, new_bbox, 80, 80, dir_save, i, 0, scale=2.7)
+                        prepare_data(img, new_bbox, 80, 80, dir_save, i, 0, scale=4)
+                        i = i + 1
+                except:
+                    print("erorr")
+                    continue

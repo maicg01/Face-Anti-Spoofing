@@ -5,3 +5,4 @@ images/
 new_image.jpg
 *.onnx
 *.jpg
+*.png
