@@ -28,7 +28,7 @@ def get_default_config():
     conf.batch_size = 1024
 
     # model
-    conf.num_classes = 3
+    conf.num_classes = 2
     conf.input_channel = 3
     conf.embedding_size = 128
 

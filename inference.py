@@ -128,12 +128,12 @@ def test(image, model_dir, device_id):
         img = image_cropper.crop(**param)
         print("shape: ", img.shape)
         start = time.time()
-        prediction += model_test.predict(img, os.path.join(model_dir, model_name))
-        test_speed += time.time()-start
+        prediction = model_test.predict(img, os.path.join(model_dir, model_name))
+        test_speed = time.time()-start
 
     # draw result of prediction
     label = np.argmax(prediction)
-    value = prediction[0][label]/2
+    value = prediction[0][label]
     if label == 1:
         print("Image '{}' is Real Face. Score: {:.2f}.".format("image_name", value))
         result_text = "RealFace Score: {:.2f}".format(value)
