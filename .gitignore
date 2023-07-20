@@ -7,3 +7,5 @@ new_image.jpg
 *.jpg
 *.png
 prepare_data_face_anti.py
+saved_logs
+tensorrtOnnx

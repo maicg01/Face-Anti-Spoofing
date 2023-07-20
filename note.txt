@@ -1,0 +1,1 @@
+chu y khi train 2 nhan that gia thi num_classes==2

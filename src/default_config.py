@@ -23,7 +23,7 @@ def get_default_config():
     # [9, 13, 15]
     conf.milestones = [10, 15, 22]  # down learing rate
     conf.gamma = 0.1
-    conf.epochs = 25
+    conf.epochs = 150
     conf.momentum = 0.9
     conf.batch_size = 1024
 

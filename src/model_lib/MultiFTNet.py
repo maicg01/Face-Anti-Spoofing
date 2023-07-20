@@ -32,11 +32,11 @@ class FTGenerator(nn.Module):
 
 
 class MultiFTNet(nn.Module):
-    def __init__(self, img_channel=3, num_classes=3, embedding_size=128, conv6_kernel=(5, 5)):
+    def __init__(self, img_channel=3, num_classes=2, embedding_size=128, conv6_kernel=(5, 5)):
         super(MultiFTNet, self).__init__()
         self.img_channel = img_channel
         self.num_classes = num_classes
-        self.model = MiniFASNetV2SE(embedding_size=embedding_size, conv6_kernel=conv6_kernel,
+        self.model = MiniFASNetV2(embedding_size=embedding_size, conv6_kernel=conv6_kernel,
                                       num_classes=num_classes, img_channel=img_channel)
         self.FTGenerator = FTGenerator(in_channels=128)
         self._initialize_weights()

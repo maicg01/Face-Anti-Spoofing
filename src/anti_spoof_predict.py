@@ -64,19 +64,46 @@ class AntiSpoofPredict(Detection):
         self.kernel_size = get_kernel(h_input, w_input,)
         self.model = MODEL_MAPPING[model_type](conv6_kernel=self.kernel_size).to(self.device)
 
-        # load model weight
+        # # load model weight
+        # state_dict = torch.load(model_path, map_location=self.device)
+        # keys = iter(state_dict)
+        # first_layer_name = keys.__next__()
+        # if first_layer_name.find('module.') >= 0:
+        #     from collections import OrderedDict
+        #     new_state_dict = OrderedDict()
+        #     for key, value in state_dict.items():
+        #         name_key = key[7:]
+        #         new_state_dict[name_key] = value
+        #     self.model.load_state_dict(new_state_dict)
+        # else:
+        #     self.model.load_state_dict(state_dict)
+
+        # doan suy luan moi
+        from collections import OrderedDict
         state_dict = torch.load(model_path, map_location=self.device)
-        keys = iter(state_dict)
-        first_layer_name = keys.__next__()
-        if first_layer_name.find('module.') >= 0:
-            from collections import OrderedDict
-            new_state_dict = OrderedDict()
-            for key, value in state_dict.items():
+
+        new_state_dict = OrderedDict()
+        for key, value in state_dict.items():
+            if key.find('module.') >= 0:
+                
                 name_key = key[7:]
-                new_state_dict[name_key] = value
-            self.model.load_state_dict(new_state_dict)
-        else:
-            self.model.load_state_dict(state_dict)
+                
+            if name_key.find('model.') >= 0:
+                name_key = name_key[6:]
+            new_state_dict[name_key] = value
+
+        params = {
+            'embedding_size': 128,
+            'conv6_kernel': (5,5),
+            'drop_p': 0.75,
+            'num_classes': 2,
+            'img_channel': 3
+        }
+
+        model = MiniFASNetV2(**params)
+
+        model.load_state_dict(new_state_dict, strict=False)
+
         return None
 
     def predict(self, img, model_path):
@@ -90,6 +117,7 @@ class AntiSpoofPredict(Detection):
         with torch.no_grad():
             result = self.model.forward(img)
             result = F.softmax(result).cpu().numpy()
+            print(result)
         return result
 
 
