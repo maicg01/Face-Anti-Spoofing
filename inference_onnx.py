@@ -15,8 +15,68 @@ from src.generate_patches import CropImage
 from src.utility import parse_model_name
 warnings.filterwarnings('ignore')
 
+def process_border_crop(img, bbox):
+    x_min, y_min, width, height = bbox
 
-path = "/home/maicg/Downloads/photo_2023-03-10_11-24-09" #khong co .jpg
+    # Thêm viền đen vào ảnh ban đầu
+    if x_min < 0 or y_min < 0:
+        border_size = 256
+    img_with_border = cv2.copyMakeBorder(img, border_size, border_size, border_size, border_size, cv2.BORDER_CONSTANT, value=[0, 0, 0])
+
+    # Tính toán lại tọa độ của bounding box trên ảnh có viền
+    x_min += border_size
+    y_min += border_size
+
+    # Cắt vùng ảnh cần thiết từ ảnh có viền
+    cropped_img = img_with_border[y_min:y_min+height, x_min:x_min+width]
+    return cropped_img
+
+def process_crop_image_size(image, bounding_box, width_resize, height_resize):
+    x1, y1, x2, y2 = bounding_box
+    height_crop = y2 - y1
+    width_crop = x2 - x1
+    h_image = int(image.shape[0])
+    w_image = int(image.shape[1])
+
+    if height_crop < height_resize: 
+        if width_crop < width_resize:
+            x1 = ((x2+x1)//2) - width_resize//2
+            x2 = ((x2+x1)//2) + width_resize//2
+            y1 = ((y2+y1)//2) - height_resize//2
+            y2 = ((y2+y1)//2) + height_resize//2
+        else:
+            y1 = ((y2+y1)//2) - width_crop//2
+            y2 = ((y2+y1)//2) + width_crop//2
+    else:
+        if width_crop < width_resize:
+            x1 = ((x2+x1)//2) - height_crop//2
+            x2 = ((x2+x1)//2) + height_crop//2
+        else:
+            if height_crop > width_crop:
+                x1 = ((x2+x1)//2) - height_crop//2
+                x2 = ((x2+x1)//2) + height_crop//2
+            else:
+                y1 = ((y2+y1)//2) - width_crop//2
+                y2 = ((y2+y1)//2) + width_crop//2
+    if x1 < 0 or y1 < 0 or x2 > w_image or y2 > h_image:
+        border_size = width_resize
+        img_with_border = cv2.copyMakeBorder(image, border_size, border_size, border_size, border_size, cv2.BORDER_CONSTANT, value=[0, 0, 0])
+        # Tính toán lại tọa độ của bounding box trên ảnh có viền
+        x1 += border_size
+        y1 += border_size
+        x2 += border_size
+        y2 += border_size
+        # Cắt vùng ảnh cần thiết từ ảnh có viền
+        image_crop = img_with_border[y1:y2, x1:x2]
+    else:
+        image_crop = image[y1:y2, x1:x2]
+    # print(y1,y2,x1,x2)
+    image_crop_resize = cv2.resize(image_crop, (width_resize,height_resize))
+
+    return image_crop_resize
+
+
+path = "/home/maicg/Downloads/photo_2023-03-10_17-39-16" #khong co .jpg
 
 def to_input(pil_rgb_image):
     np_img = np.array(pil_rgb_image, dtype = np.float32)
@@ -75,6 +135,11 @@ for face in faces:
     bbox = face.bbox.astype(np.int)
     x, y, x2, y2 = bbox
     cv2.rectangle(img, (x, y), (x2, y2), (0, 255, 0), 2)
+    image = cv2.imread(path + ".jpg")
+    img_crop = process_crop_image_size(image, bbox, 256,256)
+    cv2.imshow('img_crop', img_crop)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 cv2.imshow('Faces', img)
 cv2.waitKey(0)
@@ -82,7 +147,8 @@ cv2.destroyAllWindows()
 
 print(x, y, x2, y2)
 
-image = cv2.imread(path + ".jpg")
+
+
 height, width = image.shape[:2]
 d_org_x2 = width - x2
 d_org_y2 = height - y2
@@ -123,7 +189,7 @@ cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 def test(image, model_dir, device_id):
-    model_test = AntiSpoofPredict(device_id)
+    # model_test = AntiSpoofPredict(device_id)
     image_cropper = CropImage()
     # image_bbox = model_test.get_bbox(image)
     # print("image_bbox: ", image_bbox)
@@ -198,7 +264,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_dir",
         type=str,
-        default="./onnx",
+        default="./onnx_cu",
         help="model_lib used to test")
     parser.add_argument(
         "--image_name",

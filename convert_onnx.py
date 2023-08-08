@@ -8,7 +8,7 @@ from src.model_lib.MiniFASNet import MiniFASNetV2
 
 def main():
     model = AntiSpoofPredict(0)
-    model = model._load_model("/home/maicg/Documents/Me/ANTI-FACE/Face-Anti-Spoofing/resources/anti_spoof_models/2.7_80x80_MiniFASNetV2.pth")
+    model = model._load_model("/home/maicg/Documents/Me/ANTI-FACE/Face-Anti-Spoofing/resources/new/2.7_80x80_MiniFASNetV2.pth")
 
     # #convert to onnx
     # # Let's load the model we just created and test the accuracy per label 

@@ -14,7 +14,7 @@ from src.generate_patches import CropImage
 from src.utility import parse_model_name
 warnings.filterwarnings('ignore')
 
-path = "/home/maicg/Downloads/photo_2023-03-10_17-39-16" #khong co .jpg
+path = "/home/maicg/Downloads/2605a340b6cd6b9332dc" #khong co .jpg
 
 def take_image(image):
     height, width = image.shape[:2]
@@ -110,7 +110,7 @@ def test(image, model_dir, device_id):
     # print("image_bbox: ", image_bbox)
     image_bbox = [new_bbox_x, new_bbox_y, new_bbox_width, new_bbox_height]
     print("image_bbox: ", image_bbox)
-    prediction = np.zeros((1, 3))
+    prediction = np.zeros((1, 2))
     test_speed = 0
     # sum the prediction from single model's result
     for model_name in os.listdir(model_dir):
