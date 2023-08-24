@@ -40,43 +40,51 @@ def process_crop_image_size(image, bounding_box, width_resize, height_resize):
 
     if height_crop < height_resize: 
         if width_crop < width_resize:
-            x1 = ((x2+x1)//2) - width_resize//2
-            x2 = ((x2+x1)//2) + width_resize//2
-            y1 = ((y2+y1)//2) - height_resize//2
-            y2 = ((y2+y1)//2) + height_resize//2
+            x1_new = ((x2+x1)//2) - width_resize//2
+            x2_new = ((x2+x1)//2) + width_resize//2
+            y1_new = ((y2+y1)//2) - height_resize//2
+            y2_new = ((y2+y1)//2) + height_resize//2
         else:
-            y1 = ((y2+y1)//2) - width_crop//2
-            y2 = ((y2+y1)//2) + width_crop//2
+            x1_new = x1
+            x2_new = x2
+            y1_new = ((y2+y1)//2) - width_crop//2
+            y2_new = ((y2+y1)//2) + width_crop//2
     else:
         if width_crop < width_resize:
-            x1 = ((x2+x1)//2) - height_crop//2
-            x2 = ((x2+x1)//2) + height_crop//2
+            x1_new = ((x2+x1)//2) - height_crop//2
+            x2_new = ((x2+x1)//2) + height_crop//2
+            y1_new = y1
+            y2_new = y2
         else:
             if height_crop > width_crop:
-                x1 = ((x2+x1)//2) - height_crop//2
-                x2 = ((x2+x1)//2) + height_crop//2
+                x1_new = ((x2+x1)//2) - height_crop//2
+                x2_new = ((x2+x1)//2) + height_crop//2
+                y1_new = y1
+                y2_new = y2
             else:
-                y1 = ((y2+y1)//2) - width_crop//2
-                y2 = ((y2+y1)//2) + width_crop//2
-    if x1 < 0 or y1 < 0 or x2 > w_image or y2 > h_image:
+                x1_new = x1
+                x2_new = x2
+                y1_new = ((y2+y1)//2) - width_crop//2
+                y2_new = ((y2+y1)//2) + width_crop//2
+    if x1_new < 0 or y1_new < 0 or x2_new > w_image or y2_new > h_image:
         border_size = width_resize
         img_with_border = cv2.copyMakeBorder(image, border_size, border_size, border_size, border_size, cv2.BORDER_CONSTANT, value=[0, 0, 0])
         # Tính toán lại tọa độ của bounding box trên ảnh có viền
-        x1 += border_size
-        y1 += border_size
-        x2 += border_size
-        y2 += border_size
+        x1_new += border_size
+        x2_new += border_size
+        y1_new += border_size
+        y2_new += border_size
         # Cắt vùng ảnh cần thiết từ ảnh có viền
-        image_crop = img_with_border[y1:y2, x1:x2]
+        image_crop = img_with_border[y1_new:y2_new, x1_new:x2_new]
     else:
-        image_crop = image[y1:y2, x1:x2]
+        image_crop = image[y1_new:y2_new, x1_new:x2_new]
     # print(y1,y2,x1,x2)
     image_crop_resize = cv2.resize(image_crop, (width_resize,height_resize))
 
     return image_crop_resize
 
 
-path = "/home/maicg/Downloads/photo_2023-03-10_17-39-16" #khong co .jpg
+path = "/home/maicg/Downloads/msg-1329751329-12096" #khong co .jpg
 
 def to_input(pil_rgb_image):
     np_img = np.array(pil_rgb_image, dtype = np.float32)
@@ -136,7 +144,7 @@ for face in faces:
     x, y, x2, y2 = bbox
     cv2.rectangle(img, (x, y), (x2, y2), (0, 255, 0), 2)
     image = cv2.imread(path + ".jpg")
-    img_crop = process_crop_image_size(image, bbox, 256,256)
+    img_crop = process_crop_image_size(image, bbox, 1800,1800)
     cv2.imshow('img_crop', img_crop)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
