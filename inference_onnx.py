@@ -83,8 +83,86 @@ def process_crop_image_size(image, bounding_box, width_resize, height_resize):
 
     return image_crop_resize
 
+OK_COLOR = (127, 255, 0)
+TEXT_OK_COLOR = (0, 0, 0)
+NG_COLOR = (0, 0, 255)
+TEXT_NG_COLOR = (255, 255, 255)
+def draw_border(img, pt1, pt2, color, thickness, r, d):
+    x1, y1 = pt1
+    x2, y2 = pt2
+    # Top left
+    cv2.line(img, (x1 + r, y1), (x1 + r + d, y1), color, thickness)
+    cv2.line(img, (x1, y1 + r), (x1, y1 + r + d), color, thickness)
+    cv2.ellipse(img, (x1 + r, y1 + r), (r, r), 180, 0, 90, color, thickness)
+    # Top right
+    cv2.line(img, (x2 - r, y1), (x2 - r - d, y1), color, thickness)
+    cv2.line(img, (x2, y1 + r), (x2, y1 + r + d), color, thickness)
+    cv2.ellipse(img, (x2 - r, y1 + r), (r, r), 270, 0, 90, color, thickness)
+    # Bottom left
+    cv2.line(img, (x1 + r, y2), (x1 + r + d, y2), color, thickness)
+    cv2.line(img, (x1, y2 - r), (x1, y2 - r - d), color, thickness)
+    cv2.ellipse(img, (x1 + r, y2 - r), (r, r), 90, 0, 90, color, thickness)
+    # Bottom right
+    cv2.line(img, (x2 - r, y2), (x2 - r - d, y2), color, thickness)
+    cv2.line(img, (x2, y2 - r), (x2, y2 - r - d), color, thickness)
+    cv2.ellipse(img, (x2 - r, y2 - r), (r, r), 0, 0, 90, color, thickness)
+    return img
 
-path = "/home/maicg/Downloads/msg-1329751329-12096" #khong co .jpg
+
+def draw_rounded_rectangle(img, pt1, pt2, color, thickness, radius):
+    x1, y1 = pt1
+    x2, y2 = pt2
+    cv2.rectangle(img, (x1 + radius, y1), (x2 - radius, y2), color, thickness)
+    cv2.rectangle(img, (x1, y1 + radius), (x2, y2 - radius), color, thickness)
+    cv2.circle(img, (x1 + radius, y1 + radius), radius, color, -1)
+    cv2.circle(img, (x2 - radius, y1 + radius), radius, color, -1)
+    cv2.circle(img, (x1 + radius, y2 - radius), radius, color, -1)
+    cv2.circle(img, (x2 - radius, y2 - radius), radius, color, -1)
+
+
+def draw_box_name(image, bbox, name=None, is_unknown=False):
+    main_color = OK_COLOR
+    text_color = TEXT_OK_COLOR
+    if is_unknown:
+        main_color = NG_COLOR
+        text_color = TEXT_NG_COLOR
+
+    image = draw_border(image, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color=main_color, thickness=2, r=5, d=16)
+    x1 = bbox[0]
+    y1 = bbox[1]
+    x2 = bbox[2]
+    y2 = bbox[3]
+
+    if name is not None:
+        font_scale = 0.6  # You can adjust the font size as needed
+        font_thickness = 1
+        font_face = cv2.FONT_HERSHEY_SIMPLEX
+        text_box_width, _ = cv2.getTextSize(name, font_face, font_scale, font_thickness)[0]
+
+        text_box_width += 10
+        text_box_height = 30
+        text_box_x = (x1 + x2) // 2 - text_box_width // 2
+        text_box_y = y1 - text_box_height - 5
+        if y1 < 5:
+            text_box_y = y2 + text_box_height
+
+        # Draw the rounded rectangle as a background for the text
+        draw_rounded_rectangle(image, (text_box_x, text_box_y), (text_box_x + text_box_width, text_box_y + text_box_height),
+                            color=main_color, thickness=-1, radius=5)
+
+        # Put the name text on the image
+        text_position = (text_box_x + 5, text_box_y + text_box_height - 10)
+        cv2.putText(image, name, text_position, font_face, font_scale, text_color, font_thickness, cv2.LINE_AA)
+
+    # if kps is not None:
+    #     for idx, kp in enumerate(kps):
+    #         kp = kp.astype(int)
+    #         image = cv2.putText(image, str(idx), tuple(kp), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1, cv2.LINE_AA)
+    #         cv2.circle(image, tuple(kp), 1, (0, 0, 255), 2)
+
+    return image
+
+path = "/home/maicg/Downloads/lequan" #khong co .jpg
 
 def to_input(pil_rgb_image):
     np_img = np.array(pil_rgb_image, dtype = np.float32)
@@ -144,8 +222,10 @@ for face in faces:
     x, y, x2, y2 = bbox
     cv2.rectangle(img, (x, y), (x2, y2), (0, 255, 0), 2)
     image = cv2.imread(path + ".jpg")
-    img_crop = process_crop_image_size(image, bbox, 1800,1800)
+    img_crop = process_crop_image_size(image, bbox, 256,256)
+    image_draw = draw_box_name(image, bbox, "meme")
     cv2.imshow('img_crop', img_crop)
+    cv2.imshow('img_draw', image_draw)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
